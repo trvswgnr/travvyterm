@@ -6,10 +6,12 @@
  * @param widget the widget to modify the font of.
  * @param font_desc the font description to use.
  */
-void widget_modify_font(GtkWidget *widget, PangoFontDescription *font_desc) {
+void widget_modify_font(GtkWidget *widget, PangoFontDescription *font_desc)
+{
     gtk_widget_override_font(widget, font_desc);
     GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
-    if (child && GTK_IS_WIDGET(child)) {
+    if (child && GTK_IS_WIDGET(child))
+    {
         widget_modify_font(child, font_desc);
     }
 }
@@ -19,7 +21,8 @@ void widget_modify_font(GtkWidget *widget, PangoFontDescription *font_desc) {
  * @param widget the widget to adjust the font size of.
  * @param increase TRUE if the font size should be increased, FALSE if it should be decreased.
  */
-void adjust_font_size(GtkWidget *widget, gboolean increase) {
+void adjust_font_size(GtkWidget *widget, gboolean increase)
+{
     // decrement the font size by 2
     PangoFontDescription *font_desc = gtk_widget_get_style(widget)->font_desc;
     gint size = pango_font_description_get_size(font_desc);
@@ -34,16 +37,22 @@ void adjust_font_size(GtkWidget *widget, gboolean increase) {
  * @param user_data the user data.
  * @return TRUE if the key press event was handled, FALSE otherwise.
  */
-static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data) {
-    if (event->type == GDK_KEY_PRESS) {
+static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    if (event->type == GDK_KEY_PRESS)
+    {
         // if the last key pressed was Ctrl, then check if this key is a + or - (and if so, change the font size)
-        if (event->state & GDK_CONTROL_MASK) {
-            if (event->keyval == GDK_KEY_plus || event->keyval == GDK_KEY_equal) {
+        if (event->state & GDK_CONTROL_MASK)
+        {
+            if (event->keyval == GDK_KEY_plus || event->keyval == GDK_KEY_equal)
+            {
                 // increment the font size by 2
                 adjust_font_size(widget, TRUE);
 
                 return TRUE;
-            } else if (event->keyval == GDK_KEY_minus) {
+            }
+            else if (event->keyval == GDK_KEY_minus)
+            {
                 // decrement the font size by 2
                 adjust_font_size(widget, FALSE);
 
@@ -51,9 +60,8 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
             }
         }
 
-
-
-        if (event->keyval == GDK_KEY_Return) {
+        if (event->keyval == GDK_KEY_Return)
+        {
             // get the text that the user typed in the terminal window
             GtkWidget *terminal = widget;
             gchar *text = vte_terminal_get_text(VTE_TERMINAL(terminal), NULL, NULL, NULL);
@@ -74,7 +82,8 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
  * @param app The application.
  * @param user_data The user data.
  */
-static void on_activate(GtkApplication *app, gpointer user_data) {
+static void on_activate(GtkApplication *app, gpointer user_data)
+{
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "travvyterm");
     gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
@@ -88,10 +97,15 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 
     // start a bash shell in the terminal window
     gchar **envp = g_get_environ();
-    gchar **command = (gchar *[]){g_strdup(g_environ_getenv(envp, "SHELL")), NULL};
+    const gchar *shell = g_environ_getenv(envp, "SHELL");
+    gchar **command = (gchar *[]){g_strdup(shell), NULL};
     g_strfreev(envp);
-    vte_terminal_spawn_async(VTE_TERMINAL(terminal), VTE_PTY_DEFAULT, NULL, command, NULL, 0, NULL, NULL, NULL, -1, NULL, NULL, NULL);
 
+    vte_terminal_spawn_async(
+        VTE_TERMINAL(terminal), VTE_PTY_DEFAULT, NULL, command,
+        NULL, 0, NULL, NULL, NULL, -1, NULL, NULL, NULL);
+
+    // connect to the key-press-event signal
     g_signal_connect(terminal, "key-press-event", G_CALLBACK(on_key_press), NULL);
 
     gtk_widget_show_all(window);
@@ -102,7 +116,8 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
  * @param argv The command line arguments.
  * @return The exit status.
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     GtkApplication *app = gtk_application_new("com.techsavvytravvy.travvyterm", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
