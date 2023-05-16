@@ -15,6 +15,19 @@ void widget_modify_font(GtkWidget *widget, PangoFontDescription *font_desc) {
 }
 
 /**
+ * adjust the font size of a widget.
+ * @param widget the widget to adjust the font size of.
+ * @param increase TRUE if the font size should be increased, FALSE if it should be decreased.
+ */
+void adjust_font_size(GtkWidget *widget, gboolean increase) {
+    // decrement the font size by 2
+    PangoFontDescription *font_desc = gtk_widget_get_style(widget)->font_desc;
+    gint size = pango_font_description_get_size(font_desc);
+    pango_font_description_set_size(font_desc, size + PANGO_SCALE * (increase ? 2 : -2));
+    widget_modify_font(widget, font_desc);
+}
+
+/**
  * called when a key is pressed in the terminal window.
  * @param widget the terminal window.
  * @param event the key press event.
@@ -27,18 +40,12 @@ static gboolean on_key_press(GtkWidget *widget, GdkEventKey *event, gpointer use
         if (event->state & GDK_CONTROL_MASK) {
             if (event->keyval == GDK_KEY_plus || event->keyval == GDK_KEY_equal) {
                 // increment the font size by 2
-                PangoFontDescription *font_desc = gtk_widget_get_style(widget)->font_desc;
-                gint size = pango_font_description_get_size(font_desc);
-                pango_font_description_set_size(font_desc, size + PANGO_SCALE * 2);
-                widget_modify_font(widget, font_desc);
+                adjust_font_size(widget, TRUE);
 
                 return TRUE;
             } else if (event->keyval == GDK_KEY_minus) {
                 // decrement the font size by 2
-                PangoFontDescription *font_desc = gtk_widget_get_style(widget)->font_desc;
-                gint size = pango_font_description_get_size(font_desc);
-                pango_font_description_set_size(font_desc, size - PANGO_SCALE * 2);
-                widget_modify_font(widget, font_desc);
+                adjust_font_size(widget, FALSE);
 
                 return TRUE;
             }
@@ -91,7 +98,6 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
 }
 
 /**
- * entry point
  * @param argc The number of command line arguments.
  * @param argv The command line arguments.
  * @return The exit status.
