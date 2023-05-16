@@ -7,7 +7,7 @@
  * @param font_desc the font description to use.
  */
 void widget_modify_font(GtkWidget *widget, PangoFontDescription *font_desc) {
-    gtk_widget_modify_font(widget, font_desc);
+    gtk_widget_override_font(widget, font_desc);
     GtkWidget *child = gtk_bin_get_child(GTK_BIN(widget));
     if (child && GTK_IS_WIDGET(child)) {
         widget_modify_font(child, font_desc);
@@ -83,7 +83,7 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
     gchar **envp = g_get_environ();
     gchar **command = (gchar *[]){g_strdup(g_environ_getenv(envp, "SHELL")), NULL};
     g_strfreev(envp);
-    vte_terminal_spawn_sync(VTE_TERMINAL(terminal), VTE_PTY_DEFAULT, NULL, command, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    vte_terminal_spawn_async(VTE_TERMINAL(terminal), VTE_PTY_DEFAULT, NULL, command, NULL, 0, NULL, NULL, NULL, -1, NULL, NULL, NULL);
 
     g_signal_connect(terminal, "key-press-event", G_CALLBACK(on_key_press), NULL);
 
@@ -97,7 +97,7 @@ static void on_activate(GtkApplication *app, gpointer user_data) {
  * @return The exit status.
  */
 int main(int argc, char *argv[]) {
-    GtkApplication *app = gtk_application_new("com.techsavvytravvy.travvyterm", G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new("com.techsavvytravvy.travvyterm", G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
     int status = g_application_run(G_APPLICATION(app), argc, argv);
     g_object_unref(app);
