@@ -1,3 +1,3 @@
 # travvyterm
 
-a terminal for the tech-savvy.
+a terminal for the technologically savvy.
